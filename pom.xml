@@ -209,6 +209,13 @@
       </plugin>
     </plugins>
   </build>
+      <distributionManagement>
+    <repository>
+      <id>snapshots</id>
+      <name>c73a699b418d-snapshots</name>
+      <url>http://104.198.19.179:8081/artifactory/test</url>
+    </repository>
+  </distributionManagement>
 
   <!-- Apache 2 license -->
   <licenses>
