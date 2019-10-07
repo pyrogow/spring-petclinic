@@ -4,7 +4,7 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.epamlabs.pyrohov</groupId>
-  <artifactId>JOB_B</artifactId>
+  <artifactId>JOB_C</artifactId>
   <version>1.0.1.BUILD-SNAPSHOT</version>
 
   <parent>
