@@ -3,9 +3,13 @@
   xmlns="http://maven.apache.org/POM/4.0.0"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.epamlabs.pyrohov</groupId>
+<!--   <groupId>com.epamlabs.pyrohov</groupId>
   <artifactId>JOB_C</artifactId>
-  <version>1.0.1.BUILD-SNAPSHOT</version>
+  <version>1.0.1.BUILD-SNAPSHOT</version> -->
+    
+  <groupId>{groupId}</groupId>
+  <artifactId>{artifactId}</artifactId>
+  <version>{version}</version>
 
   <parent>
     <groupId>org.springframework.boot</groupId>
