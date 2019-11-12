@@ -48,7 +48,9 @@ pipeline {
     stage('Docker Build') {
       agent any
       steps {
-        sh 'docker build -t pyrogow/app1:latest .'
+        sh 'docker build -t pyrogow/app1:latest d.'
+        sh 'docker tag pyrogow/app1 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
+        sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       }
     }
   }
