@@ -54,7 +54,7 @@ pipeline {
         // sh 'chmod +x login.sh'
         // sh 'sh ./login.sh'
         sh 'docker tag pyrogow/app1:latest 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
-        sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
+        sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main${BUILD_NUMBER}'
       }
     }
   }
