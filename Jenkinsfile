@@ -45,11 +45,14 @@ pipeline {
         sh 'mvn clean install'
       }
     }
-    stage('Docker Build') {
+    stage('Docker Build and push image to ECS') {
       agent any
       steps {
-        sh 'docker build -t pyrogow/app1:latest d.'
-        sh 'docker tag pyrogow/app1 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
+        sh 'docker build -t pyrogow/app1:latest .'
+        sh 'aws ecr get-login --no-include-email --region=eu-central-1 >> login.sh'
+        sh 'chmod +x login.sh'
+        sh 'sh ./login'
+        sh 'docker tag pyrogow/app1:latest 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
         sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       }
     }
