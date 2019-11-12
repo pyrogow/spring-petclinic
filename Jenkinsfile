@@ -49,10 +49,10 @@ pipeline {
       agent any
       steps {
         sh 'docker build -t pyrogow/app1:latest .'
-        sh '$(aws ecr get-login --no-include-email --region=eu-central-1)'
-        // sh 'aws ecr get-login --no-include-email --region=eu-central-1 > login.sh'
-        // sh 'chmod +x login.sh'
-        // sh 'sh ./login.sh'
+        // sh '$(aws ecr get-login --no-include-email --region=eu-central-1)'
+        sh 'aws ecr get-login --no-include-email --region=eu-central-1 > login.sh'
+        sh 'sudo chmod +x login.sh'
+        sh './login.sh'
         sh 'docker tag pyrogow/app1:latest 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
         sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       }
