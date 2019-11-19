@@ -49,7 +49,7 @@ pipeline {
       agent {
       docker.withRegistry('591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main', 'ASW-Credentials'){
         sh 'docker build -t pyrogow/app1:latest .'
-        sh 'docker tag pyrogow/app1:latest 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
+        sh "docker tag pyrogow/app1${env.BUILD_NUMBER}:latest 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main"
         sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       }
       }
