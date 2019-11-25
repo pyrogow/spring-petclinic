@@ -48,14 +48,14 @@ pipeline {
         sh 'mvn clean install'
       }
     }
-    stage('Docker Build and push image to ECS') {
-      agent {
-        docker {
-          // docker.withRegistry([credentialsId: "${env.ASW-Credentials}", uri: "${env.ECRUrl}"]){
-          docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
-          // }
-        }
-      }
+    // stage('Docker Build and push image to ECS') {
+    //   agent {
+    //     docker {
+    //       // docker.withRegistry([credentialsId: "${env.ASW-Credentials}", uri: "${env.ECRUrl}"]){
+    //       docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+    //       // }
+    //     }
+    //   }
       // agent any
       // steps {
       //   sh 'docker build -t pyrogow/app1:latest .'
@@ -66,6 +66,6 @@ pipeline {
       //   sh 'docker tag pyrogow/app1:latest 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       //   sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       // }
-    }
+    // }
   }
 }
