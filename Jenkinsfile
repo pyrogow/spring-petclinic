@@ -48,9 +48,11 @@ pipeline {
         sh 'mvn clean install'
       }
     }
-    stage {
-      docker{
-        docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+    stage('Docker build') {
+      docker {
+        steps {
+          docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+        }
       }
     }
     // stage('Docker Build and push image to ECS') {
