@@ -49,9 +49,18 @@ pipeline {
       }
     }
     stage('Docker build') {
-      agent {
-        docker {
+      steps {
+        script {
           docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+        }
+      }
+    }
+    stage('Docker push') {
+      steps {
+        script {
+          docker.withRegistry("${env.ECRUrl}","env.ASW-Credentials") {
+            docker.image("${env.ECRUrl}:${env.BUILD_NUMBER}").push()
+          }
         }
       }
     }
@@ -70,7 +79,7 @@ pipeline {
       //   // sh 'aws ecr get-login --no-include-email --region=eu-central-1 > login.sh'
       //   // sh 'sudo chmod +x login.sh'
       //   // sh './login.sh'
-      //   sh 'docker tag pyrogow/app1:latest 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
+      //   sh 'docker tag pyrogow/app1:latest https://591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       //   sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       // }
     // }
