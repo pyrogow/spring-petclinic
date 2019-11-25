@@ -51,8 +51,8 @@ pipeline {
     stage('Docker Build and push image to ECS') {
       agent {
         docker {
-          docker.withRegistry(${env.ECRUrl},${env.ASW-Credentials}){
-            docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}", ".")
+          docker.withRegistry([credentialsId: "${env.ASW-Credentials}", uri: "${env.ECRUrl}"]){
+            docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
           }
         }
       }
