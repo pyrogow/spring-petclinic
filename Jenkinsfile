@@ -47,11 +47,6 @@ pipeline {
       steps {
         sh 'mvn clean install'
       }
-      steps {
-        script {
-          docker.build("pyrogowtestapp:${env.BUILD_NUMBER}", ".")
-        }
-      }
     }
     stage('Docker build') {
       steps {
