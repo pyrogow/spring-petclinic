@@ -51,9 +51,9 @@ pipeline {
     stage('Docker Build and push image to ECS') {
       agent {
         docker {
-          docker.withRegistry([credentialsId: "${env.ASW-Credentials}", uri: "${env.ECRUrl}"]){
-            docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
-          }
+          // docker.withRegistry([credentialsId: "${env.ASW-Credentials}", uri: "${env.ECRUrl}"]){
+          docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+          // }
         }
       }
       // agent any
