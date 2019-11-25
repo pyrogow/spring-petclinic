@@ -36,7 +36,7 @@
 
 
 pipeline {
-  agent none
+  agent any
   stages {
     stage('Maven Install') {
       agent {
@@ -51,7 +51,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+          docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}", ".")
         }
       }
     }
@@ -59,11 +59,14 @@ pipeline {
       steps {
         script {
           docker.withRegistry("${env.ECRUrl}","${env.ASW-Credentials}") {
-            docker.image("${env.ECRUrl}:${env.BUILD_NUMBER}").push()
+            docker.image("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}").push()
           }
         }
       }
     }
+  }
+}
+
     // stage('Docker Build and push image to ECS') {
     //   agent {
     //     docker {
@@ -83,5 +86,3 @@ pipeline {
       //   sh 'docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main'
       // }
     // }
-  }
-}
