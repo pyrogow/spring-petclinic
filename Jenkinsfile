@@ -51,7 +51,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}", "Dockerfile .")
+          docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}", ".")
         }
       }
     }
