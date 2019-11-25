@@ -49,9 +49,11 @@ pipeline {
       }
     }
     stage('Docker build') {
-      docker {
-        steps {
-          docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+      agent {
+        docker {
+          steps {
+            docker.build("${env.ECRUrl}:${env.BUILD_NUMBER}", ".")
+          }
         }
       }
     }
