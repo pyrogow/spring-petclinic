@@ -48,22 +48,28 @@ pipeline {
         sh 'mvn clean install'
       }
     }
-    stage('Docker build') {
+    stage('Docker Build') {
+      agent any
       steps {
-        script {
-          docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest", ".")
-        }
+        sh 'docker build -t shanem/spring-petclinic:latest .'
       }
     }
-    stage('Push image to ECR') {
-      steps {
-        script {
-          docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${AWSCredentials}") {
-            docker.image("pyrogowtestapp-${env.BUILD_NUMBER}").push()
-          }
-        }
-      }
-    }
+    // stage('Docker build') {
+    //   steps {
+    //     script {
+    //       docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest", ".")
+    //     }
+    //   }
+    // }
+    // stage('Push image to ECR') {
+    //   steps {
+    //     script {
+    //       docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${AWSCredentials}") {
+    //         docker.image("pyrogowtestapp-${env.BUILD_NUMBER}").push()
+    //       }
+    //     }
+    //   }
+    // }
   }
 }
 

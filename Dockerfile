@@ -1,6 +1,5 @@
 FROM anapsix/alpine-java
 LABEL maintainer="pyrogow@gmail.com"
-VOLUME /tmp
 COPY /target/*.jar /home/*.jar
 
 # COPY target/*.jar /home/ec2-user/
