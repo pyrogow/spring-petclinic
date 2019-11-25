@@ -58,7 +58,7 @@ pipeline {
     stage('Docker push') {
       steps {
         script {
-          docker.withRegistry("${env.ECRUrl}","env.ASW-Credentials") {
+          docker.withRegistry("${env.ECRUrl}","${env.ASW-Credentials}") {
             docker.image("${env.ECRUrl}:${env.BUILD_NUMBER}").push()
           }
         }
