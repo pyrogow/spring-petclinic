@@ -51,7 +51,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("pyrogowtestapp:${env.BUILD_NUMBER}:latest", ".")
+          docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest", ".")
         }
       }
     }
@@ -59,7 +59,7 @@ pipeline {
       steps {
         script {
           docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${AWSCredentials}") {
-            docker.image("pyrogowtestapp:${env.BUILD_NUMBER}").push()
+            docker.image("pyrogowtestapp-${env.BUILD_NUMBER}").push()
           }
         }
       }
