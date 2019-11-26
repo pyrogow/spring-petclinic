@@ -59,7 +59,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("pyrogow-petclinic-${env.BUILD_NUMBER}")
+          docker.build("-t pyrogow-petclinic-${env.BUILD_NUMBER}")
         }
       }
     }
