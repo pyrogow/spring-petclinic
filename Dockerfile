@@ -1,6 +1,6 @@
 FROM anapsix/alpine-java
 LABEL maintainer="pyrogow@gmail.com"
-EXPOSE 3306:3306
+EXPOSE 8080
 ADD /target/*.jar /app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
 
