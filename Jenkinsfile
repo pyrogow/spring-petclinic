@@ -36,7 +36,7 @@
 
 
 pipeline {
-  agent docker
+  agent none
   stages {
     stage('Maven Install') {
       agent {
