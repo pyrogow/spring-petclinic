@@ -64,7 +64,7 @@ pipeline {
     stage('Push image to ECR') {
       steps {
         script {
-          docker.withRegistry("${env.ECRUrl}","${env.51f3b79f-1e8a-4ccd-888b-4a9dcdb3646c}") {
+          docker.withRegistry("${env.ECRUrl}","${51f3b79f-1e8a-4ccd-888b-4a9dcdb3646c}") {
             docker.image("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}").push()
           }
         }
