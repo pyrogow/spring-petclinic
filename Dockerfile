@@ -1,5 +1,6 @@
 FROM anapsix/alpine-java
 LABEL maintainer="pyrogow@gmail.com"
+EXPOSE 3306:3306
 COPY /target/*.jar /home/*.jar
 ENTRYPOINT ["java","-jar","/*.jar"]
 
