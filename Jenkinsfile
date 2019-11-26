@@ -61,15 +61,15 @@ pipeline {
         }
       }
     }
-    // stage('Push image to ECR') {
-    //   steps {
-    //     script {
-    //       docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${AWSCredentials}") {
-    //         docker.image("pyrogowtestapp-${env.BUILD_NUMBER}").push()
-    //       }
-    //     }
-    //   }
-    // }
+    stage('Push image to ECR') {
+      steps {
+        script {
+          docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${AWSCredentials}") {
+            docker.image("pyrogow-petclinic-${env.BUILD_NUMBER}:latest").push()
+          }
+        }
+      }
+    }
   }
 }
 
