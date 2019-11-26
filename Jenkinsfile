@@ -37,6 +37,9 @@
 
 pipeline {
   agent none
+  environment {
+    AWSCredentials = "${env.AWSCredentials}"
+  }
   stages {
     stage('Maven Install') {
       agent {
@@ -64,7 +67,7 @@ pipeline {
     stage('Push image to ECR') {
       steps {
         script {
-          docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${env.AWSCredentials}") {
+          docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:AWSCredentials") {
             sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}:latest"
           }
 
