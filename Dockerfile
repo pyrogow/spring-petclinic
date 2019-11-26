@@ -1,7 +1,7 @@
 FROM anapsix/alpine-java
 LABEL maintainer="pyrogow@gmail.com"
 EXPOSE 3306:3306
-COPY /target/*.jar /app.jar
+ADD /target/*.jar /app.jar
 ENTRYPOINT ["java","-jar","/app.jar"]
 
 # COPY target/*.jar /home/ec2-user/
