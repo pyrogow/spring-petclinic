@@ -57,7 +57,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}:latest")
+          docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}")
         }
       }
     }
@@ -65,7 +65,7 @@ pipeline {
       steps {
         script {
           docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${env.AWSCredentials}") {
-            docker.image("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}:latest").push()
+            docker.image("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}").push()
           }
         }
       }
