@@ -57,7 +57,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest", ".")
+          docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest .")
         }
       }
     }
