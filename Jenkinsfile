@@ -48,19 +48,19 @@ pipeline {
         sh 'mvn clean install'
       }
     }
-    stage('Docker Build') {
-      agent any
-      steps {
-        sh 'docker build -t spring-petclinic:latest .'
-      }
-    }
-    // stage('Docker build') {
+    // stage('Docker Build') {
+    //   agent any
     //   steps {
-    //     script {
-    //       docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest", ".")
-    //     }
+    //     sh 'docker build -t spring-petclinic:latest .'
     //   }
     // }
+    stage('Docker build') {
+      steps {
+        script {
+          docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest", ".")
+        }
+      }
+    }
     // stage('Push image to ECR') {
     //   steps {
     //     script {
