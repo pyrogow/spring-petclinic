@@ -36,7 +36,9 @@
 
 
 pipeline {
-  agent any
+  agent any {
+    dockerfile true
+  }
   stages {
     stage('Maven Install') {
       agent {
@@ -57,7 +59,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("pyrogowtestapp-${env.BUILD_NUMBER}:latest .")
+          docker.build("pyrogow-petclinic-${env.BUILD_NUMBER}")
         }
       }
     }
