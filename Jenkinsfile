@@ -69,6 +69,7 @@ pipeline {
         script {
           docker.withRegistry("https://591425342341.dkr.ecr.eu-central-1.amazonaws.com","ECR-Artifactory-Docker") {
             sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}"
+            sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest"
           }
 
 
@@ -78,6 +79,9 @@ pipeline {
         }
       }
     }
+    // stage('Tags') {
+      
+    // }
   }
 }
 
