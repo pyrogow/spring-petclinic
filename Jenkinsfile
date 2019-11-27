@@ -60,7 +60,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}:latest")
+          docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
         }
       }
     }
@@ -68,7 +68,7 @@ pipeline {
       steps {
         script {
           docker.withRegistry("https://591425342341.dkr.ecr.eu-central-1.amazonaws.com","ECR-Artifactory-Docker") {
-            sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}:latest"
+            sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}"
           }
 
 
