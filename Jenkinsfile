@@ -60,7 +60,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          imageTag = docker.build("petclinic.ce8nag1602dl.eu-central-1.rds.amazonaws.com/app-main:${env.BUILD_NUMBER}")
+          imageTag = docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest")
         }
@@ -69,7 +69,7 @@ pipeline {
     stage('Push image to ECR') {
       steps {
         script {
-          docker.withRegistry("https://petclinic.ce8nag1602dl.eu-central-1.rds.amazonaws.com","ECR-Artifactory-Docker") {
+          docker.withRegistry("https://591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main","ECR-Artifactory-Docker") {
             imageTag.push()
             imageTag.push('latest')
             // sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}"
