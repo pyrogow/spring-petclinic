@@ -84,11 +84,11 @@ pipeline {
       }
     }
     stage('Tags') {
-      docekr.withCredentials([[$class: 'UsernamePasswordMultiBinding', 
+      docker.withCredentials([[$class: 'UsernamePasswordMultiBinding', 
         credentialsId: '50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f', 
         usernameVariable: 'GIT_USERNAME', 
         passwordVariable: 'GIT_PASSWORD']]) {    
-        sh('git push https://${GIT_USERNAME}:${GIT_PASSWORD}@https://github.com/pyrogow/spring-petclinic.git --tags')
+        sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@https://github.com/pyrogow/spring-petclinic.git --tags ${env.BUILD_NUMBER} latest")
         }
     }
   }
