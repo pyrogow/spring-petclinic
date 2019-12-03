@@ -434,11 +434,12 @@ Resources:
           Value: PetclinicDatabase
       # VPCSecurityGroups:
       #   - Ref: DBSecurityGroup
-  DBSecurityGroup:
-    Type: "AWS::RDS::DBSecurityGroup"
-    Properties:
-      GroupDescription: Access to the RDS
-      EC2VpcId: !Ref "VPC"
+      # BIG PROBLEM. DBSecurityGroup is not supported in this region. The following resource(s) failed to create: [DBSecurityGroup].
+  # DBSecurityGroup:
+  #   Type: "AWS::RDS::DBSecurityGroup"
+  #   Properties:
+  #     GroupDescription: Access to the RDS
+  #     EC2VpcId: !Ref "VPC"
   # Properties:
   #   DBSecurityGroupIngress:
   #     # CIDRIP: "-1"
