@@ -3,9 +3,13 @@ Description:
   A stack for deploying containerized applications onto a cluster of EC2
   hosts using Elastic Container Service
 Parameters:
+  # KeyName:
+  #   Type: AWS::EC2::KeyPair::KeyName
+  #   Description: Name of an existing EC2 KeyPair to enable SSH access to the instance
+  #   ConstraintDescription: must be the name of an existing EC2 KeyPair
   StackName:
     Type: String
-    Default: Phase3StackMain
+    Default: Phase3StackMain3
     Description: The name of the parent cluster stack that you created.
   DesiredCapacity:
     Type: Number
@@ -81,17 +85,25 @@ Parameters:
     MaxLength: "16"
     AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
     ConstraintDescription: must begin with a letter and contain only alphanumeric characters.
-  MultiAZDatabase:
-    Default: "false"
-    Description: Create a Multi-AZ MySQL Amazon RDS database instance
+  DBPassword:
+    Default: petclinic
+    NoEcho: "true"
+    Description: admin petclinicDB account password
     Type: String
-  WebServerCapacity:
-    Default: "1"
-    Description: The initial number of WebServer instances
-    Type: Number
-    MinValue: "1"
-    MaxValue: "2"
-    ConstraintDescription: must be between 1 and 5 EC2 instances.
+    MinLength: "1"
+    MaxLength: "254"
+    AllowedPattern: "[a-zA-Z][a-zA-Z0-9]*"
+  # MultiAZDatabase:
+  #   Default: "false"
+  #   Description: Create a Multi-AZ MySQL Amazon RDS database instance
+  #   Type: String
+  # WebServerCapacity:
+  #   Default: "1"
+  #   Description: The initial number of WebServer instances
+  #   Type: Number
+  #   MinValue: "1"
+  #   MaxValue: "2"
+  #   ConstraintDescription: must be between 1 and 5 EC2 instances.
   DBAllocatedStorage:
     Default: "5"
     Description: The size of the database (Gb)
@@ -99,6 +111,32 @@ Parameters:
     MinValue: "5"
     MaxValue: "20"
     ConstraintDescription: must be between 5 and 1024Gb.
+  ServiceName:
+    Type: String
+    Default: PetclinicImages
+    Description: A name for the service
+  ContainerCpu:
+    Type: Number
+    Default: 256
+    Description: How much CPU to give the container. 1024 is 1 CPU
+  ContainerMemory:
+    Type: Number
+    Default: 512
+    Description: How much memory in megabytes to give the container
+  ContainerPort:
+    Type: Number
+    Default: 8080
+    Description: What port number the application inside the docker container is binding to
+  ImageUrl:
+    Type: String
+    Default: 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:276
+    Description:
+      The url of a docker image that contains the application process that
+      will handle the traffic for this service
+  DesiredCount:
+    Type: Number
+    Default: 1
+    Description: How many copies of the service task to run
 # ________________MAPPING_______________
 Mappings:
   # Hard values for the subnet masks. These masks define
@@ -116,11 +154,13 @@ Mappings:
   # ranges to add more
   SubnetConfig:
     VPC:
-      CIDR: "10.0.0.0/16"
+      CIDR: "172.31.0.0/16"
     PublicOne:
-      CIDR: "10.0.0.0/24"
+      CIDR: "172.31.1.0/24"
     PublicTwo:
-      CIDR: "10.0.1.0/24"
+      CIDR: "172.31.2.0/24"
+    DBPublic:
+      CIDR: "172.31.3.0/24"
     # PrivateOne:
     #   CIDR: "10.0.2.0/24"
     # PrivateTwo:
@@ -155,6 +195,12 @@ Resources:
       VpcId: !Ref "VPC"
       CidrBlock: !FindInMap ["SubnetConfig", "PublicTwo", "CIDR"]
       MapPublicIpOnLaunch: true
+  DBPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref "VPC"
+      CidrBlock: !FindInMap ["SubnetConfig", "DBPublic", "CIDR"]
+      MapPublicIpOnLaunch: true
 
   # Setup networking resources for the public subnets. Containers
   # in the public subnets have public IP addresses and the routing table
@@ -187,10 +233,45 @@ Resources:
     Properties:
       SubnetId: !Ref PublicSubnetTwo
       RouteTableId: !Ref PublicRouteTable
+  DBPublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref DBPublicSubnet
+      RouteTableId: !Ref PublicRouteTable
 
   ECSCluster:
     Type: AWS::ECS::Cluster
 
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      # taskRoleArn: !GetAtt EC2Role.Arn
+      ContainerDefinitions:
+        - Name: !Ref ServiceName
+          Cpu: !Ref ContainerCpu
+          Memory: !Ref ContainerMemory
+          # Image: "591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest"
+          Image: !Ref ImageUrl
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+      # taskRoleArn: !Ref "EC2Role"
+
+  ECSService:
+    Type: AWS::ECS::Service
+    DependsOn: PublicLoadBalancerListener
+    Properties:
+      ServiceName: !Ref ServiceName
+      Cluster: !Ref "ECSCluster"
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 75
+      DesiredCount: !Ref DesiredCount
+      TaskDefinition: !Ref ECSTaskDefinition
+      LoadBalancers:
+        - ContainerName: !Ref ServiceName
+          ContainerPort: !Ref ContainerPort
+          TargetGroupArn: !Ref TargetGroupPublic
   # A security group for the EC2 hosts that will run the containers.
   # Two rules, allowing network traffic from a public facing load
   # balancer and from other hosts in the security group.
@@ -202,8 +283,33 @@ Resources:
   EcsHostSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Access to the ECS hosts that run containers
+      GroupDescription: Access to the ECS hosts and the tasks/containers that run on them
       VpcId: !Ref "VPC"
+      SecurityGroupIngress:
+        # Only allow inbound access to ECS from the ELB
+        - SourceSecurityGroupId: !Ref PublicLoadBalancerSG
+          IpProtocol: -1
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+      SecurityGroupEgress:
+        - SourceSecurityGroupId: !Ref PublicLoadBalancerSG
+          IpProtocol: -1
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: -1
   EcsSecurityGroupIngressFromPublicALB:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -211,13 +317,6 @@ Resources:
       GroupId: !Ref "EcsHostSecurityGroup"
       IpProtocol: -1
       SourceSecurityGroupId: !Ref "PublicLoadBalancerSG"
-  # EcsSecurityGroupIngressFromPrivateALB:
-  #   Type: AWS::EC2::SecurityGroupIngress
-  #   Properties:
-  #     Description: Ingress from the private ALB
-  #     GroupId: !Ref "EcsHostSecurityGroup"
-  #     IpProtocol: -1
-  #     SourceSecurityGroupId: !Ref "PrivateLoadBalancerSG"
   EcsSecurityGroupIngressFromSelf:
     Type: AWS::EC2::SecurityGroupIngress
     Properties:
@@ -249,13 +348,14 @@ Resources:
       ImageId: !Ref "ECSAMI"
       SecurityGroups: [!Ref "EcsHostSecurityGroup"]
       InstanceType: !Ref "InstanceType"
+      KeyName: aws-my_laptop2eu
       IamInstanceProfile: !Ref "EC2InstanceProfile"
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash -xe
           echo ECS_CLUSTER=${ECSCluster} >> /etc/ecs/ecs.config
-          # yum install -y aws-cfn-bootstrap
-          # /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
+          yum install -y aws-cfn-bootstrap
+          /opt/aws/bin/cfn-signal -e $? --stack ${AWS::StackName} --resource ECSAutoScalingGroup --region ${AWS::Region}
 
   AutoscalingRole:
     Type: AWS::IAM::Role
@@ -319,6 +419,62 @@ Resources:
                   - "ecr:GetDownloadUrlForLayer"
                 Resource: "*"
 
+  DatabaseInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBName: !Ref DBName
+      Engine: MySQL
+      MasterUserPassword: !Ref DBPassword
+      MasterUsername: !Ref DBUser
+      DBInstanceClass: !Ref DBClass
+      AllocatedStorage: "5"
+      Port: "3306"
+      Tags:
+        - Key: Name
+          Value: PetclinicDatabase
+      # VPCSecurityGroups:
+      #   - Ref: DBSecurityGroup
+  DBSecurityGroup:
+    Type: "AWS::RDS::DBSecurityGroup"
+    Properties:
+      GroupDescription: Access to the RDS
+      EC2VpcId: !Ref "VPC"
+  # Properties:
+  #   DBSecurityGroupIngress:
+  #     # CIDRIP: "-1"
+  #     EC2SecurityGroupName:
+  #       EC2SecurityGroupName:
+  #         Ref: EcsHostSecurityGroup
+  #   GroupDescription: database access
+
+  # DBSecurityGroup:
+  #   Type: "AWS::EC2::SecurityGroup"
+  #   Properties:
+  #     GroupDescription: Open database for access
+  #     VpcId: !Ref VPC
+
+  # DBSecurityGroupIngress:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     GroupId: !Ref DBSecurityGroup
+  #     IpProtocol: tcp
+  #     FromPort: "3306"
+  #     ToPort: "3306"
+  #     CidrIp: !FindInMap ["SubnetConfig", "VPC", "CIDR"]
+
+  # DBSecurityGroups:
+  #   - !Ref DBSecurityGroup
+
+  # DBSecurityGroup:
+  #   Type: "AWS::EC2::SecurityGroup"
+  #   Properties:
+  #     GroupDescription: Access to the RDS
+  #     VpcId: !Ref "VPC"
+  # Properties:
+  #   DBSecurityGroupIngress:
+  #     EC2SecurityGroupName: !Ref EcsHostSecurityGroup
+  #   GroupDescription: database access
+
   # Load balancers for getting traffic to containers.
   # This sample template creates load balancer:
   #
@@ -356,12 +512,12 @@ Resources:
   TargetGroupPublic:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      HealthCheckIntervalSeconds: 6
+      HealthCheckIntervalSeconds: 10
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 5
+      HealthCheckTimeoutSeconds: 9
       HealthyThresholdCount: 2
-      Name: !Join ["-", [!Ref "AWS::StackName", "drop-1"]]
+      Name: !Join ["-", [!Ref "AWS::StackName"]]
       Port: 80
       Protocol: HTTP
       UnhealthyThresholdCount: 2
@@ -481,3 +637,17 @@ Outputs:
     Value: !Ref "EcsHostSecurityGroup"
     Export:
       Name: !Join [":", [!Ref "AWS::StackName", "EcsHostSecurityGroup"]]
+  JDBCConnectionString:
+    Description: JDBC connection string for the database
+    Value: !Join
+      - ""
+      - - "jdbc:mysql://"
+        - !GetAtt
+          - DatabaseInstance
+          - Endpoint.Address
+        - ":"
+        - !GetAtt
+          - DatabaseInstance
+          - Endpoint.Port
+        - /
+        - !Ref DBName

@@ -85,7 +85,7 @@ pipeline {
     }
     // stage('Tags') {
     //   docker.withCredentials([[$class: 'UsernamePasswordMultiBinding', 
-    //     credentialsId: '50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f', 
+    //     credentialsId: 'CREDS', 
     //     usernameVariable: 'GIT_USERNAME', 
     //     passwordVariable: 'GIT_PASSWORD']]) {    
     //     sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@https://github.com/pyrogow/spring-petclinic.git --tags ${env.BUILD_NUMBER} latest")
@@ -93,10 +93,12 @@ pipeline {
     // }
     stage('Tags') {
       steps {
-        sshagent(['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
+        script{
+          sshagent(['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
           sh("git tag ${env.BUILD_NUMBER}")
-          sh("git tag ${env.BUILD_NUMBER}latest")
+          sh("git tag latest")
           sh("git push --tags")
+        }
         }
       }
       // docker.withCredentials([[$class: 'UsernamePasswordMultiBinding', 
