@@ -37,9 +37,10 @@
 
 pipeline {
   agent any
-  // environment {
-  //   AWSCredentials = "${env.AWSCredentials}"
-  // }
+  environment {
+    GIT_USERNAME = credentials('GIT_USERNAME')
+    GIT_PASSWORD = credentials('GIT_PASSWORD')
+  }
   stages {
     stage('Maven Install') {
       agent {
@@ -123,7 +124,7 @@ pipeline {
           sshagent (credentials: ["50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f"]) {
             sh("git tag -a v1.0.${env.BUILD_NUMBER} -m 'Tag of Job BUILD_NUMBER from Jenkins'")
             sh("git tag -fa v1.0.latest -m 'Tag of Job BUILD_NUMBER from Jenkins'")
-            sh("git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@https://github.com/pyrogow/spring-petclinic.git --tags")
+            sh("git push ${env.GIT_USERNAME}:${env.GIT_PASSWORD}@https://github.com/pyrogow/spring-petclinic.git --tags")
           }
         }
       }
