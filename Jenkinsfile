@@ -60,7 +60,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          imageTag = docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
+          imageTag = docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:v1.0.${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest")
         }
@@ -91,6 +91,25 @@ pipeline {
     //     sh("git push https://${GIT_USERNAME}:${GIT_PASSWORD}@https://github.com/pyrogow/spring-petclinic.git --tags ${env.BUILD_NUMBER} latest")
     //     }
     // }
+    stage('Tags1') {
+      steps {
+        script {
+          withRegistry("https://github.com/pyrogow/spring-petclinic.git","50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f") {
+            sh("git tag -a v1.0.${env.BUILD_NUMBER} -m 'Tag of Job BUILD_NUMBER from Jenkins'")
+            sh("git tag -a v1.0.latest -m 'Tag of Job BUILD_NUMBER from Jenkins'")
+            sh('git push https://github.com/pyrogow/spring-petclinic.git --tags')
+            // sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}"
+            // sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest"
+          }
+
+
+          // docker.withRegistry("${env.ECRUrl}","ecr:eu-central-1:${env.AWSCredentials}") {
+          //   docker.image("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main-${env.BUILD_NUMBER}").push()
+          // }
+        }
+      }
+    }
+
     stage('Tags') {
       steps {
         script{
@@ -101,8 +120,8 @@ pipeline {
           // sh("git push --tag")
           // }
           sshagent (credentials: ['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
-            sh("git tag -a ${env.BUILD_NUMBER} -m 'Tag from Jenkins BUILD_NUMBER'")
-            sh("git tag -a latest -m 'Tag from Jenkins BUILD_NUMBER'")
+            sh("git tag -a v1.0.${env.BUILD_NUMBER} -m 'Tag of Job BUILD_NUMBER from Jenkins'")
+            sh("git tag -a v1.0.latest -m 'Tag of Job BUILD_NUMBER from Jenkins'")
             sh('git push https://github.com/pyrogow/spring-petclinic.git --tags')
           }
         }
