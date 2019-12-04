@@ -94,7 +94,8 @@ pipeline {
     stage('Tags1') {
       steps {
         script {
-          docker.withRegistry("https://github.com/pyrogow/spring-petclinic.git","50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f") {
+          // docker.withRegistry("https://github.com/pyrogow/spring-petclinic.git","50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f") {
+          docker.withCredentials([usernamePassword(credentialsId: '50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
             sh("git tag -a v1.0.${env.BUILD_NUMBER} -m 'Tag of Job BUILD_NUMBER from Jenkins'")
             sh("git tag -a v1.0.latest -m 'Tag of Job BUILD_NUMBER from Jenkins'")
             sh('git push https://github.com/pyrogow/spring-petclinic.git --tags')
