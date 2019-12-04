@@ -64,7 +64,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          echo "$1/target/*"
+          echo "\$1/target/*"
           imageTag = docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest")
