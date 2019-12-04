@@ -92,15 +92,18 @@ pipeline {
     //     }
     // }
     stage('Tags') {
-      agent any {
-        steps {
-          script{
-            sshagent(['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
-            sh("git tag ${env.BUILD_NUMBER}")
-            sh("git tag latest")
-            sh("git push --all")
-            sh("git push --tag")
-            }
+      steps {
+        script{
+          // sshagent(['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
+          // sh("git tag ${env.BUILD_NUMBER}")
+          // sh("git tag latest")
+          // sh("git push --all")
+          // sh("git push --tag")
+          // }
+          sshagent (credentials: ['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
+            sh("git tag -a ${env.BUILD_NUMBER} -m 'Tag from Jenkins'")
+            sh("git tag -a latest -m 'Tag from Jenkins'")
+            sh('git push --tags')
           }
         }
       }
