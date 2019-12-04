@@ -92,16 +92,19 @@ pipeline {
     //     }
     // }
     stage('Tags') {
-      steps {
-        script{
-          sshagent(['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
-          sh("git tag ${env.BUILD_NUMBER}")
-          sh("git tag latest")
-          sh("git push --all")
-          sh("git push --tag")
-        }
+      agent none {
+        steps {
+          script{
+            sshagent(['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
+            sh("git tag ${env.BUILD_NUMBER}")
+            sh("git tag latest")
+            sh("git push --all")
+            sh("git push --tag")
+            }
+          }
         }
       }
+      
       // docker.withCredentials([[$class: 'UsernamePasswordMultiBinding', 
       //   credentialsId: '50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f', 
       //   usernameVariable: 'GIT_USERNAME', 
