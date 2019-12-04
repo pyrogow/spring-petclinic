@@ -73,7 +73,7 @@ pipeline {
     stage('Push image to ECR') {
       steps {
         script {
-          docker.withRegistry("${env.ERC_ATRIFACORY}","ECR-Artifactory-Docker") {
+          docker.withRegistry("https://591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main","ECR-Artifactory-Docker") {
             imageTag.push()
             imageTag.push('latest')
             // sh "docker push 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}"
