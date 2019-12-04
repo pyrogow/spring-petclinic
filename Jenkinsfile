@@ -40,9 +40,6 @@ pipeline {
   environment {
     GIT_USERNAME = credentials('GIT_USERNAME')
     GIT_PASSWORD = credentials('GIT_PASSWORD')
-    GIT_CREDENTIALS_ID = credentials('50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f')
-    GIT_REPO = credentials('GIT_REPO')
-    ERC_ATRIFACORY = credentials('ERC_ATRIFACORY')
   }
   stages {
     stage('Maven Install') {
@@ -64,8 +61,7 @@ pipeline {
     stage('Docker build') {
       steps {
         script {
-          echo "\$1/target/*"
-          imageTag = docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
+          imageTag = docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:v1.0.${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:${env.BUILD_NUMBER}")
           // docker.build("591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest")
         }
@@ -116,13 +112,19 @@ pipeline {
     //   }
     // }
 
-    stage('Git Tags') {
+    stage('Tags') {
       steps {
         script{
-          sshagent (credentials: ["${env.GIT_CREDENTIALS_ID}"]) {
-            sh("git tag -a v1.0.${env.BUILD_NUMBER} -m 'Tag of Job ${env.BUILD_NUMBER} from Jenkins'")
-            sh("git tag -fa latest -m 'Tag of latest Job from Jenkins'")
-            sh("git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@${env.GIT_REPO} --tags")
+          // sshagent(['50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f']) {
+          // sh("git tag ${env.BUILD_NUMBER}")
+          // sh("git tag latest")
+          // sh("git push --all")
+          // sh("git push --tag")
+          // }
+          sshagent (credentials: ["50f2207a-24b1-46d7-a0b1-f6ffc2b02a7f"]) {
+            sh("git tag -a v1.0.${env.BUILD_NUMBER} -m 'Tag of Job BUILD_NUMBER from Jenkins'")
+            sh("git tag -fa v1.0.latest -m 'Tag of Job BUILD_NUMBER from Jenkins'")
+            sh("git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@github.com/${env.GIT_USERNAME}/spring-petclinic.git --tags")
           }
         }
       }
