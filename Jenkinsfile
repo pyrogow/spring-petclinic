@@ -125,7 +125,7 @@ pipeline {
           // }
           sshagent (credentials: ["${env.GIT_CREDENTIALS_ID}"]) {
             sh("git tag -a v1.0.${env.BUILD_NUMBER} -m 'Tag of Job ${env.BUILD_NUMBER} from Jenkins'")
-            sh("git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@${env.GIT_REPO} --delete origin latest")
+            // sh("git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@${env.GIT_REPO} --delete latest")
             sh("git tag -fa latest -m 'Tag of latest Job from Jenkins'")
             sh("git push https://${env.GIT_USERNAME}:${env.GIT_PASSWORD}@${env.GIT_REPO} --tags")
           }
