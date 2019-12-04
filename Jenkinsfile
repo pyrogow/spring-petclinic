@@ -36,7 +36,7 @@
 
 
 pipeline {
-  // agent none
+  agent any
   // environment {
   //   AWSCredentials = "${env.AWSCredentials}"
   // }
