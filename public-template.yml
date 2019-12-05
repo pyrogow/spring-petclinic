@@ -9,7 +9,7 @@ Parameters:
   #   ConstraintDescription: must be the name of an existing EC2 KeyPair
   StackName:
     Type: String
-    Default: Phase3StackMain2
+    Default: Phase3StackMain
     Description: The name of the parent cluster stack that you created.
   DesiredCapacity:
     Type: Number
@@ -129,8 +129,8 @@ Parameters:
     Description: What port number the application inside the docker container is binding to
   ImageUrl:
     Type: String
-    # Default: 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:276
     Default: 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest
+    # Default: nginx
     Description:
       The url of a docker image that contains the application process that
       will handle the traffic for this service
@@ -282,6 +282,22 @@ Resources:
   # If you want to make direct requests to a container using its
   # public IP address you'll need to add a security group rule
   # to allow traffic from all IP addresses.
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Access to the ECS hosts and the tasks/containers that run on them
+      VpcId: !Ref "VPC"
+      SecurityGroupIngress:
+        # Only allow inbound access to ECS from the ELB
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+      SecurityGroupEgress:
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
   EcsHostSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -425,6 +441,14 @@ Resources:
                   - "ecr:GetDownloadUrlForLayer"
                 Resource: "*"
 
+  myDBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: DBSusnetGroupdescription
+      SubnetIds:
+        - !Ref PublicSubnetOne
+        - !Ref PublicSubnetTwo
+
   DatabaseInstance:
     Type: AWS::RDS::DBInstance
     Properties:
@@ -433,12 +457,35 @@ Resources:
       MasterUserPassword: !Ref DBPassword
       MasterUsername: !Ref DBUser
       DBInstanceClass: !Ref DBClass
-      AllocatedStorage: "5"
-      Port: "3306"
+      AllocatedStorage: 5
+      Port: 3306
+      DBSubnetGroupName: !Ref myDBSubnetGroup
       Tags:
         - Key: Name
           Value: PetclinicDatabase
       # VPCSecurityGroups:
+      #   - !GetAtt DBEC2SecurityGroup.GroupId
+
+  DBEC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Open database for access
+      SecurityGroupIngress:
+        # - SourceSecurityGroupId: !Ref EcsHostSecurityGroup
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+      # SecurityGroupIngress:
+      #   # Only allow inbound access to ECS from the ELB
+      #   - SourceSecurityGroupId: !Ref PublicLoadBalancerSG
+      #     IpProtocol: -1
+      #   - CidrIp: 0.0.0.0/0
+      #     IpProtocol: tcp
+      #     FromPort: 22
+      #     ToPort: 22
+      # VPCSecurityGroups:
+      #   - Ref: RDSSecurityGroup
       #   - Ref: DBSecurityGroup
       # BIG PROBLEM. DBSecurityGroup is not supported in this region. The following resource(s) failed to create: [DBSecurityGroup].
   # DBSecurityGroup:
@@ -639,6 +686,11 @@ Outputs:
   #   Value: !Ref "PrivateSubnetTwo"
   #   Export:
   #     Name: !Join [":", [!Ref "AWS::StackName", "PrivateSubnetTwo"]]
+  DBEC2SecurityGroup:
+    Description: A DBInstance security group
+    Value: !Ref "EcsHostSecurityGroup"
+    Export:
+      Name: !Join [":", [!Ref "AWS::StackName", "DBEC2SecurityGroup"]]
   EcsHostSecurityGroup:
     Description: A security group used to allow containers to receive traffic
     Value: !Ref "EcsHostSecurityGroup"
