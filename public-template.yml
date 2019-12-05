@@ -9,7 +9,7 @@ Parameters:
   #   ConstraintDescription: must be the name of an existing EC2 KeyPair
   StackName:
     Type: String
-    Default: Phase3StackMain3
+    Default: Phase3StackMain
     Description: The name of the parent cluster stack that you created.
   DesiredCapacity:
     Type: Number
