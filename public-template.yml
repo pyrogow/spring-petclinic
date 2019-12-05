@@ -129,7 +129,8 @@ Parameters:
     Description: What port number the application inside the docker container is binding to
   ImageUrl:
     Type: String
-    Default: 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:276
+    # Default: 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:276
+    Default: nginx
     Description:
       The url of a docker image that contains the application process that
       will handle the traffic for this service
