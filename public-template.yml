@@ -9,7 +9,7 @@ Parameters:
   #   ConstraintDescription: must be the name of an existing EC2 KeyPair
   StackName:
     Type: String
-    Default: Phase3StackMain
+    Default: Phase3StackMain2
     Description: The name of the parent cluster stack that you created.
   DesiredCapacity:
     Type: Number
@@ -130,7 +130,7 @@ Parameters:
   ImageUrl:
     Type: String
     # Default: 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:276
-    Default: nginx
+    Default: 591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest
     Description:
       The url of a docker image that contains the application process that
       will handle the traffic for this service
@@ -243,21 +243,6 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
 
-  ECSTaskDefinition:
-    Type: AWS::ECS::TaskDefinition
-    Properties:
-      # taskRoleArn: !GetAtt EC2Role.Arn
-      ContainerDefinitions:
-        - Name: !Ref ServiceName
-          Cpu: !Ref ContainerCpu
-          Memory: !Ref ContainerMemory
-          # Image: "591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest"
-          Image: !Ref ImageUrl
-          PortMappings:
-            - ContainerPort: !Ref ContainerPort
-              Protocol: tcp
-      # taskRoleArn: !Ref "EC2Role"
-
   ECSService:
     Type: AWS::ECS::Service
     DependsOn: PublicLoadBalancerListener
@@ -273,6 +258,22 @@ Resources:
         - ContainerName: !Ref ServiceName
           ContainerPort: !Ref ContainerPort
           TargetGroupArn: !Ref TargetGroupPublic
+
+  ECSTaskDefinition:
+    Type: AWS::ECS::TaskDefinition
+    Properties:
+      # taskRoleArn: !GetAtt EC2Role.Arn
+      ContainerDefinitions:
+        - Name: !Ref ServiceName
+          Cpu: !Ref ContainerCpu
+          Memory: !Ref ContainerMemory
+          # Image: "591425342341.dkr.ecr.eu-central-1.amazonaws.com/app-main:latest"
+          Image: !Ref ImageUrl
+          PortMappings:
+            - ContainerPort: !Ref ContainerPort
+              Protocol: tcp
+      # taskRoleArn: !Ref "EC2Role"
+
   # A security group for the EC2 hosts that will run the containers.
   # Two rules, allowing network traffic from a public facing load
   # balancer and from other hosts in the security group.
@@ -294,6 +295,10 @@ Resources:
           IpProtocol: tcp
           FromPort: 22
           ToPort: 22
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
         - CidrIp: 0.0.0.0/0
           IpProtocol: tcp
           FromPort: 80
@@ -520,7 +525,7 @@ Resources:
       HealthCheckTimeoutSeconds: 9
       HealthyThresholdCount: 2
       Name: !Join ["-", [!Ref "AWS::StackName"]]
-      Port: 80
+      Port: 8080
       Protocol: HTTP
       UnhealthyThresholdCount: 2
       VpcId: !Ref "VPC"
